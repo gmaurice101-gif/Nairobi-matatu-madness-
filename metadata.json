@@ -1,0 +1,6 @@
+{
+  "name": "Matatu Racing: Nairobi Highway",
+  "description": "A high-speed Kenyan-themed racing game where you dodge traffic on the busy streets of Nairobi.",
+  "requestFramePermissions": ["bluetooth"],
+  "majorCapabilities": []
+}

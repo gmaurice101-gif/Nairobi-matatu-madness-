@@ -1,0 +1,38 @@
+{
+  "entities": {
+    "Message": {
+      "title": "Message",
+      "description": "An encrypted message sent between players.",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "description": "The encrypted message text." },
+        "senderId": { "type": "string", "description": "The UID of the sender." },
+        "senderName": { "type": "string", "description": "The name of the sender." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the message was sent." }
+      },
+      "required": ["text", "senderId", "senderName", "timestamp"]
+    },
+    "Player": {
+      "title": "Player",
+      "description": "A player in the game.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "highScore": { "type": "number" }
+      },
+      "required": ["uid", "displayName"]
+    }
+  },
+  "firestore": {
+    "/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Global chat messages."
+    },
+    "/players/{uid}": {
+      "schema": "Player",
+      "description": "Player profiles."
+    }
+  }
+}
