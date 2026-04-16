@@ -58,8 +58,17 @@ export default function App() {
     }
   };
 
+  const handleRestart = () => {
+    resetGame();
+    setGameStarted(true);
+  };
+
   const handleSteer = (direction: 'left' | 'right') => {
-    if (gameOver || isPaused) return;
+    if (isPaused) return;
+    if (gameOver) {
+      handleRestart();
+      return;
+    }
     const event = new KeyboardEvent('keydown', { 
       key: direction === 'left' ? 'ArrowLeft' : 'ArrowRight' 
     });
@@ -190,7 +199,7 @@ export default function App() {
                 <p className="text-slate-300 text-xs sm:text-sm mb-4 sm:mb-6">Nairobi traffic is ruthless.</p>
                 <div className="text-3xl sm:text-5xl font-display font-bold text-yellow-400 mb-4 sm:mb-8">{score}</div>
                 <button 
-                  onClick={resetGame}
+                  onClick={handleRestart}
                   className="bg-white text-slate-950 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 text-sm sm:text-base"
                 >
                   <RotateCcw size={18} />

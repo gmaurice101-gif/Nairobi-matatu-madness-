@@ -42,6 +42,32 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, onSteer }) => {
       <div className="absolute top-40 left-10 w-8 h-4 bg-black/20 rounded-full blur-sm" />
       <div className="absolute top-[500px] right-12 w-10 h-6 bg-black/20 rounded-full blur-sm" />
 
+      {/* Street Lights */}
+      {[100, 300, 500].map((y) => (
+        <div key={`light-${y}`} className="absolute w-1 h-8 bg-slate-600 -left-1" style={{ top: `${y}px` }}>
+          <div className="absolute -top-1 -right-2 w-3 h-1 bg-slate-500 rounded-full" />
+          <div className="absolute -top-1 -right-2 w-2 h-2 bg-yellow-200/40 rounded-full blur-[2px] animate-pulse" />
+        </div>
+      ))}
+
+      {/* Road Signs */}
+      <div className="absolute top-1/4 -right-2 w-6 h-6 bg-white border-2 border-red-600 rounded-full flex items-center justify-center shadow-md rotate-12">
+        <span className="text-[8px] font-bold text-black">80</span>
+      </div>
+      <div className="absolute top-2/3 -left-2 w-6 h-6 bg-blue-600 border-2 border-white rounded-sm flex items-center justify-center shadow-md -rotate-12">
+        <div className="w-3 h-1 bg-white" />
+      </div>
+
+      {/* Pedestrians (on the "sidewalk" edges) */}
+      <div className="absolute top-[150px] -left-3 flex flex-col items-center opacity-60">
+        <div className="w-2 h-2 bg-orange-400 rounded-full" />
+        <div className="w-3 h-4 bg-blue-500 rounded-t-sm" />
+      </div>
+      <div className="absolute top-[450px] -right-3 flex flex-col items-center opacity-60">
+        <div className="w-2 h-2 bg-green-400 rounded-full" />
+        <div className="w-3 h-4 bg-red-500 rounded-t-sm" />
+      </div>
+
       {/* Traffic */}
       {traffic.map((v) => (
         <div 
