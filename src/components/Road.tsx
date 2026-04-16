@@ -16,12 +16,12 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, onSteer }) => {
 
   return (
     <div 
-      className="relative bg-slate-800 border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[280px] sm:w-[300px] h-[500px] sm:h-[600px] touch-none mx-auto"
+      className="relative bg-slate-800 border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[220px] sm:w-[260px] h-[500px] sm:h-[600px] touch-none mx-auto"
     >
       {/* Lane Markers */}
       <div className="absolute inset-0 flex justify-evenly pointer-events-none">
         {Array.from({ length: LANES - 1 }).map((_, i) => (
-          <div key={i} className="h-full w-1 border-r-2 border-dashed border-white/20" />
+          <div key={i} className="h-full w-0.5 border-r border-dashed border-white/20" />
         ))}
       </div>
 
@@ -43,18 +43,18 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, onSteer }) => {
       <div className="absolute top-[500px] right-12 w-10 h-6 bg-black/20 rounded-full blur-sm" />
 
       {/* Street Lights */}
-      {[100, 300, 500].map((y) => (
-        <div key={`light-${y}`} className="absolute w-1 h-8 bg-slate-600 -left-1" style={{ top: `${y}px` }}>
-          <div className="absolute -top-1 -right-2 w-3 h-1 bg-slate-500 rounded-full" />
-          <div className="absolute -top-1 -right-2 w-2 h-2 bg-yellow-200/40 rounded-full blur-[2px] animate-pulse" />
+      {[100, 250, 400, 550].map((y) => (
+        <div key={`light-${y}`} className="absolute w-0.5 h-6 bg-slate-600 -left-1" style={{ top: `${y}px` }}>
+          <div className="absolute -top-1 -right-1.5 w-2 h-0.5 bg-slate-500 rounded-full" />
+          <div className="absolute -top-1 -right-1.5 w-1.5 h-1.5 bg-yellow-200/40 rounded-full blur-[1px] animate-pulse" />
         </div>
       ))}
 
       {/* Road Signs */}
-      <div className="absolute top-1/4 -right-2 w-6 h-6 bg-white border-2 border-red-600 rounded-full flex items-center justify-center shadow-md rotate-12">
+      <div className="absolute top-[15%] -right-2 w-6 h-6 bg-white border-2 border-red-600 rounded-full flex items-center justify-center shadow-md rotate-12">
         <span className="text-[8px] font-bold text-black">80</span>
       </div>
-      <div className="absolute top-2/3 -left-2 w-6 h-6 bg-blue-600 border-2 border-white rounded-sm flex items-center justify-center shadow-md -rotate-12">
+      <div className="absolute top-[60%] -left-2 w-6 h-6 bg-blue-600 border-2 border-white rounded-sm flex items-center justify-center shadow-md -rotate-12">
         <div className="w-3 h-1 bg-white" />
       </div>
 
@@ -72,7 +72,7 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, onSteer }) => {
       {traffic.map((v) => (
         <div 
           key={v.id} 
-          className="absolute w-14 h-20 sm:w-16 sm:h-24 z-0"
+          className="absolute w-10 h-14 sm:w-12 sm:h-18 z-0"
           style={{ 
             left: `${(v.lane * (100 / LANES)) + (100 / LANES / 2)}%`,
             top: `${v.y}%`,
@@ -87,7 +87,7 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, onSteer }) => {
       <motion.div 
         animate={{ left: `${(playerLane * (100 / LANES)) + (100 / LANES / 2)}%` }}
         transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-        className="absolute w-14 h-20 sm:w-16 sm:h-24 top-[75%] z-10"
+        className="absolute w-10 h-14 sm:w-12 sm:h-18 top-[75%] z-10"
         style={{ 
           transform: 'translateX(-50%)'
         }}

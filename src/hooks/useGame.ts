@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Color, COLORS, Vehicle, LANES, VehicleType } from '../types';
 
-const INITIAL_SPEED = 0.5;
-const SPEED_INCREMENT = 0.0001;
-const SPAWN_RATE = 800; // ms
+const INITIAL_SPEED = 0.3;
+const SPEED_INCREMENT = 0.00008;
+const SPAWN_RATE = 1000; // ms
 const PLAYER_Y = 75; // Percentage from top
 
 export function useGame(isActive: boolean = true) {
@@ -88,7 +88,7 @@ export function useGame(isActive: boolean = true) {
 
       // Collision check
       const collision = nextTraffic.find(v => 
-        v.lane === playerLaneRef.current && v.y > PLAYER_Y - 5 && v.y < PLAYER_Y + 15
+        v.lane === playerLaneRef.current && v.y > PLAYER_Y - 10 && v.y < PLAYER_Y + 10
       );
 
       if (collision) {

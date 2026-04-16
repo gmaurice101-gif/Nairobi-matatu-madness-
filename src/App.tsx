@@ -109,7 +109,7 @@ export default function App() {
       </div>
 
       {/* Main Container */}
-      <div className="relative z-10 flex flex-col md:flex-row gap-8 items-start mt-12 md:mt-0">
+      <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start mt-12 md:mt-0">
         
         {/* Left Side: Stats */}
         <div className="flex flex-row md:flex-col gap-2 sm:gap-4 w-full md:w-48">
@@ -162,7 +162,8 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-[100]"
+                onClick={handleStart}
+                className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-[100] cursor-pointer"
               >
                 <h1 className="text-3xl sm:text-5xl font-display font-black text-white mb-1 sm:mb-2 tracking-tighter">
                   MATATU <span className="text-yellow-400">RACING</span>
@@ -180,7 +181,6 @@ export default function App() {
                 </div>
 
                 <button 
-                  onClick={handleStart}
                   className="bg-green-600 hover:bg-green-500 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-green-900/20 text-sm sm:text-base"
                 >
                   <Play fill="currentColor" size={18} />
@@ -193,13 +193,13 @@ export default function App() {
               <motion.div 
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="absolute inset-0 bg-red-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-[100]"
+                onClick={handleRestart}
+                className="absolute inset-0 bg-red-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-[100] cursor-pointer"
               >
                 <h2 className="text-2xl sm:text-4xl font-display font-black text-white mb-1 sm:mb-2">CRASHED!</h2>
                 <p className="text-slate-300 text-xs sm:text-sm mb-4 sm:mb-6">Nairobi traffic is ruthless.</p>
                 <div className="text-3xl sm:text-5xl font-display font-bold text-yellow-400 mb-4 sm:mb-8">{score}</div>
                 <button 
-                  onClick={handleRestart}
                   className="bg-white text-slate-950 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 text-sm sm:text-base"
                 >
                   <RotateCcw size={18} />
