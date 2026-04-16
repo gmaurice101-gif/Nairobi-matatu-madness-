@@ -6,7 +6,7 @@ const SPEED_INCREMENT = 0.0001;
 const SPAWN_RATE = 800; // ms
 const PLAYER_Y = 75; // Percentage from top
 
-export function useGame() {
+export function useGame(isActive: boolean = true) {
   const [playerLane, setPlayerLane] = useState(1); // Middle lane
   const [traffic, setTraffic] = useState<Vehicle[]>([]);
   const [score, setScore] = useState(0);
@@ -23,21 +23,25 @@ export function useGame() {
   const gameSpeedRef = useRef(gameSpeed);
   const gameOverRef = useRef(gameOver);
   const isPausedRef = useRef(isPaused);
+  const isActiveRef = useRef(isActive);
 
   useEffect(() => { playerLaneRef.current = playerLane; }, [playerLane]);
   useEffect(() => { gameSpeedRef.current = gameSpeed; }, [gameSpeed]);
   useEffect(() => { gameOverRef.current = gameOver; }, [gameOver]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
+  useEffect(() => { isActiveRef.current = isActive; }, [isActive]);
 
+  const vehicleCountRef = useRef(0);
   const getRandomVehicle = useCallback((): Vehicle => {
+    vehicleCountRef.current += 1;
     const colors = Object.keys(COLORS) as Color[];
     const color = colors[Math.floor(Math.random() * colors.length)];
-    const types: VehicleType[] = ['matatu', 'bus', 'tuk-tuk', 'boda-boda', 'taxi'];
+    const types: VehicleType[] = ['matatu', 'bus', 'tuk-tuk', 'boda-boda', 'taxi', 'truck', 'bicycle', 'lorry', 'suv'];
     const type = types[Math.floor(Math.random() * types.length)];
     const lane = Math.floor(Math.random() * LANES);
 
     return {
-      id: `traffic-${crypto.randomUUID()}`,
+      id: `traffic-${vehicleCountRef.current}-${crypto.randomUUID()}`,
       lane,
       y: -20, // Start above screen
       color,
@@ -58,7 +62,7 @@ export function useGame() {
   };
 
   const update = useCallback((time: number) => {
-    if (gameOverRef.current || isPausedRef.current) {
+    if (!isActiveRef.current || gameOverRef.current || isPausedRef.current) {
       lastTimeRef.current = time;
       gameLoopRef.current = requestAnimationFrame(update);
       return;

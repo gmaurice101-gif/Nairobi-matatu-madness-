@@ -75,7 +75,7 @@ export const Messaging: React.FC = () => {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-yellow-400 text-slate-950 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-40"
+        className="fixed top-4 right-4 w-12 h-12 bg-yellow-400 text-slate-950 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-40"
       >
         <MessageSquare size={24} />
       </button>
@@ -83,10 +83,10 @@ export const Messaging: React.FC = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, y: 100, scale: 0.9 }}
+            initial={{ opacity: 0, y: -100, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className="fixed bottom-24 right-6 w-80 h-[450px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
+            exit={{ opacity: 0, y: -100, scale: 0.9 }}
+            className="fixed top-20 right-4 w-80 h-[450px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 border-bottom border-slate-800 bg-slate-800/50 flex items-center justify-between">
@@ -104,9 +104,9 @@ export const Messaging: React.FC = () => {
               ref={scrollRef}
               className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 scrollbar-hide"
             >
-              {messages.map((msg) => (
+              {messages.map((msg, idx) => (
                 <div 
-                  key={msg.id}
+                  key={`${msg.id}-${idx}`}
                   className={`flex flex-col ${msg.senderId === auth.currentUser?.uid ? 'items-end' : 'items-start'}`}
                 >
                   <span className="text-[10px] text-slate-500 mb-1 px-1">{msg.senderName}</span>

@@ -32,9 +32,9 @@ export const Bluetooth: React.FC = () => {
       // Fallback simulation for environments without Web Bluetooth (like iframes)
       setTimeout(() => {
         setDevices([
-          { name: "Nairobi-Express-BT", id: `sim-${Date.now()}-1` },
-          { name: "Matatu-Nganya-5G", id: `sim-${Date.now()}-2` },
-          { name: "Kibera-Racer-Link", id: `sim-${Date.now()}-3` }
+          { name: "Nairobi-Express-BT", id: `sim-${crypto.randomUUID()}` },
+          { name: "Matatu-Nganya-5G", id: `sim-${crypto.randomUUID()}` },
+          { name: "Kibera-Racer-Link", id: `sim-${crypto.randomUUID()}` }
         ]);
       }, 2000);
     } finally {
@@ -46,7 +46,7 @@ export const Bluetooth: React.FC = () => {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 w-14 h-14 bg-blue-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-40"
+        className="fixed top-4 left-4 w-12 h-12 bg-blue-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-40"
       >
         <BluetoothIcon size={24} />
       </button>

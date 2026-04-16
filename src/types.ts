@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type Color = 'yellow' | 'green' | 'red' | 'blue' | 'purple' | 'orange';
+export type Color = 'yellow' | 'green' | 'red' | 'blue' | 'purple' | 'orange' | 'pink' | 'cyan' | 'white' | 'black' | 'silver';
 
-export type VehicleType = 'matatu' | 'bus' | 'tuk-tuk' | 'boda-boda' | 'taxi';
+export type VehicleType = 'matatu' | 'bus' | 'tuk-tuk' | 'boda-boda' | 'taxi' | 'truck' | 'bicycle' | 'lorry' | 'suv';
 
 export interface Vehicle {
   id: string;
@@ -26,4 +26,9 @@ export const COLORS: Record<Color, string> = {
   blue: '#005EB8',   // Matatu Blue
   purple: '#800080',
   orange: '#FF8C00',
+  pink: '#FF69B4',
+  cyan: '#00FFFF',
+  white: '#FFFFFF',
+  black: '#000000',
+  silver: '#C0C0C0',
 };

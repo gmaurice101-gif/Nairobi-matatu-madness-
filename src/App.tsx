@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useGame } from './hooks/useGame';
 import { Road } from './components/Road';
-import { Matatu } from './components/Matatu';
+import { Vehicle } from './components/Vehicle';
 import { Messaging } from './components/Messaging';
 import { Bluetooth } from './components/Bluetooth';
 import { auth } from './firebase';
@@ -11,6 +11,7 @@ import { Trophy, Play, Pause, RotateCcw, Volume2, VolumeX, Music, Zap, LogIn, Us
 import confetti from 'canvas-confetti';
 
 export default function App() {
+  const [gameStarted, setGameStarted] = useState(false);
   const {
     playerLane,
     traffic,
@@ -20,10 +21,9 @@ export default function App() {
     isPaused,
     resetGame,
     setIsPaused
-  } = useGame();
+  } = useGame(gameStarted);
 
   const [isMuted, setIsMuted] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-start md:justify-center p-4 font-sans relative overflow-y-auto overflow-x-hidden">
+    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-start md:justify-center p-4 pb-32 font-sans relative overflow-y-auto overflow-x-hidden">
       {/* Nairobi Skyline Background */}
       <div className="fixed bottom-0 left-0 right-0 h-64 opacity-20 pointer-events-none z-0">
         <div className="absolute bottom-0 left-1/4 w-32 h-48 bg-slate-800 rounded-t-lg" />
@@ -153,7 +153,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-20"
+                className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-[100]"
               >
                 <h1 className="text-3xl sm:text-5xl font-display font-black text-white mb-1 sm:mb-2 tracking-tighter">
                   MATATU <span className="text-yellow-400">RACING</span>
@@ -166,7 +166,7 @@ export default function App() {
                     transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                     className="absolute top-2 w-12 h-8"
                   >
-                    <Matatu color="yellow" type="matatu" />
+                    <Vehicle color="yellow" type="matatu" />
                   </motion.div>
                 </div>
 
@@ -184,7 +184,7 @@ export default function App() {
               <motion.div 
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="absolute inset-0 bg-red-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-20"
+                className="absolute inset-0 bg-red-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-[100]"
               >
                 <h2 className="text-2xl sm:text-4xl font-display font-black text-white mb-1 sm:mb-2">CRASHED!</h2>
                 <p className="text-slate-300 text-xs sm:text-sm mb-4 sm:mb-6">Nairobi traffic is ruthless.</p>
@@ -203,7 +203,7 @@ export default function App() {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm flex flex-col items-center justify-center z-20"
+                className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm flex flex-col items-center justify-center z-[100]"
               >
                 <button 
                   onClick={() => setIsPaused(false)}

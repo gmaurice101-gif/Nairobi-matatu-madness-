@@ -1,6 +1,6 @@
 import React from 'react';
 import { Vehicle, LANES } from '../types';
-import { Matatu } from './Matatu';
+import { Vehicle as VehicleComponent } from './Vehicle';
 import { motion } from 'motion/react';
 
 interface RoadProps {
@@ -10,24 +10,13 @@ interface RoadProps {
 }
 
 export const Road: React.FC<RoadProps> = ({ playerLane, traffic, onSteer }) => {
-  const handleRoadClick = (e: React.MouseEvent | React.TouchEvent) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-    const relativeX = x - rect.left;
-    const midpoint = rect.width / 2;
-
-    if (relativeX < midpoint) {
-      onSteer('left');
-    } else {
-      onSteer('right');
-    }
+  const handleSteerZone = (direction: 'left' | 'right') => {
+    onSteer(direction);
   };
 
   return (
     <div 
-      className="relative bg-slate-800 border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[280px] sm:w-[300px] h-[500px] sm:h-[600px] cursor-pointer touch-none mx-auto"
-      onClick={handleRoadClick}
-      onTouchStart={handleRoadClick}
+      className="relative bg-slate-800 border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[280px] sm:w-[300px] h-[500px] sm:h-[600px] touch-none mx-auto"
     >
       {/* Lane Markers */}
       <div className="absolute inset-0 flex justify-evenly pointer-events-none">
@@ -64,7 +53,7 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, onSteer }) => {
             transform: 'translateX(-50%)'
           }}
         >
-          <Matatu color={v.color} type={v.type} />
+          <VehicleComponent color={v.color} type={v.type} />
         </div>
       ))}
 
@@ -77,12 +66,22 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, onSteer }) => {
           transform: 'translateX(-50%)'
         }}
       >
-        <Matatu color="yellow" type="matatu" isPlayer />
+        <VehicleComponent color="yellow" type="matatu" isPlayer />
       </motion.div>
 
-      {/* Control Indicators (Visual feedback) */}
-      <div className="absolute inset-y-0 left-0 w-1/2 bg-white/0 hover:bg-white/5 transition-colors pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-1/2 bg-white/0 hover:bg-white/5 transition-colors pointer-events-none" />
+      {/* Explicit Steering Zones (Side Controls) */}
+      <div className="absolute inset-0 flex z-30">
+        <div 
+          onPointerDown={() => handleSteerZone('left')}
+          className="w-1/2 h-full cursor-pointer active:bg-white/5 transition-colors"
+          aria-label="Steer Left"
+        />
+        <div 
+          onPointerDown={() => handleSteerZone('right')}
+          className="w-1/2 h-full cursor-pointer active:bg-white/5 transition-colors"
+          aria-label="Steer Right"
+        />
+      </div>
     </div>
   );
 };
