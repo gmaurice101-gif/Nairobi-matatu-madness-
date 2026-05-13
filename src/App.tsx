@@ -37,6 +37,7 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [currentPrinciple, setCurrentPrinciple] = useState(NAIROBI_WISDOM[0]);
+  const [isMobileLeaderboardOpen, setIsMobileLeaderboardOpen] = useState(false);
 
   useEffect(() => {
     if (gameOver && user) {
@@ -382,14 +383,54 @@ export default function App() {
         </div>
       </div>
 
-      {/* Mobile Leaderboard */}
-      <div className="w-full max-w-md mt-6 md:hidden">
-        <Leaderboard />
-      </div>
-
       {/* Global Comms Overlays (Responsive) */}
       <Messaging />
       <Bluetooth />
+
+      {/* Mobile Collapsible Leaderboard */}
+      <div className="md:hidden">
+        <button 
+          onClick={() => setIsMobileLeaderboardOpen(true)}
+          className="fixed bottom-24 right-4 z-[60] w-12 h-12 bg-yellow-400 text-slate-950 rounded-full flex items-center justify-center shadow-2xl border-4 border-slate-900 active:scale-90 transition-transform"
+        >
+          <Trophy size={20} />
+        </button>
+
+        <AnimatePresence>
+          {isMobileLeaderboardOpen && (
+            <>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMobileLeaderboardOpen(false)}
+                className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[100]"
+              />
+              <motion.div 
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed top-0 right-0 h-full w-[85%] max-w-[320px] bg-slate-900 z-[101] shadow-2xl p-6 border-l border-slate-800"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="text-yellow-400" size={24} />
+                    <h2 className="text-xl font-display font-black text-white italic tracking-tighter">LEGENDS</h2>
+                  </div>
+                  <button 
+                    onClick={() => setIsMobileLeaderboardOpen(false)}
+                    className="p-2 text-slate-500 hover:text-white"
+                  >
+                    <RotateCcw className="rotate-45" size={20} />
+                  </button>
+                </div>
+                <Leaderboard />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Floating Decorative Elements */}
       <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-500/10 rounded-full blur-3xl" />
