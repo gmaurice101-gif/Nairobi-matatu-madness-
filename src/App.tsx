@@ -9,7 +9,7 @@ import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User } from 'f
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Play, Pause, RotateCcw, Volume2, VolumeX, Music, Zap, LogIn, User as UserIcon, BookOpen } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { THINK_AND_GROW_RICH_PRINCIPLES } from './constants';
+import { NAIROBI_WISDOM } from './constants';
 
 export default function App() {
   const [gameStarted, setGameStarted] = useState(false);
@@ -29,7 +29,7 @@ export default function App() {
 
   const [isMuted, setIsMuted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [currentPrinciple, setCurrentPrinciple] = useState(THINK_AND_GROW_RICH_PRINCIPLES[0]);
+  const [currentPrinciple, setCurrentPrinciple] = useState(NAIROBI_WISDOM[0]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -40,9 +40,9 @@ export default function App() {
 
   useEffect(() => {
     if (gameOver) {
-      // Pick a random principle on crash
-      const randomIdx = Math.floor(Math.random() * THINK_AND_GROW_RICH_PRINCIPLES.length);
-      setCurrentPrinciple(THINK_AND_GROW_RICH_PRINCIPLES[randomIdx]);
+      // Pick a random wisdom on crash
+      const randomIdx = Math.floor(Math.random() * NAIROBI_WISDOM.length);
+      setCurrentPrinciple(NAIROBI_WISDOM[randomIdx]);
 
       confetti({
         particleCount: 150,
@@ -225,7 +225,7 @@ export default function App() {
                   <div className="absolute -top-4 -right-4 w-24 h-24 bg-red-500/10 rounded-full blur-2xl" />
                   <div className="flex items-center gap-2 text-red-400 mb-2 justify-center">
                     <BookOpen size={14} />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Principle #{currentPrinciple.number}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Nairobi Wisdom #{currentPrinciple.number}</span>
                   </div>
                   <h3 className="text-white font-display font-bold text-lg mb-2 uppercase tracking-tight">{currentPrinciple.title}</h3>
                   <p className="text-slate-300 text-[11px] leading-relaxed italic">"{currentPrinciple.lesson}"</p>

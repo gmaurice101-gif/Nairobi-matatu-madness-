@@ -1,67 +1,52 @@
-export const THINK_AND_GROW_RICH_PRINCIPLES = [
+export const NAIROBI_WISDOM = [
   {
     number: 1,
-    title: "Desire",
-    lesson: "The starting point of all achievement. You must have a burning desire to achieve your goals."
+    title: "The Nairobi Spirit",
+    lesson: "Nairobi is the only city where a traffic jam is a legitimate social event and a business opportunity for hawkers."
   },
   {
     number: 2,
-    title: "Faith",
-    lesson: "Visualizing and believing in the attainment of desire. Faith is the head chemist of the mind."
+    title: "Matatu Culture",
+    lesson: "If your matatu doesn't have at least 15 screens, a sub-woofer that shakes the ground, and a DJ, is it even a matatu?"
   },
   {
     number: 3,
-    title: "Auto-suggestion",
-    lesson: "The medium for influencing the subconscious mind. Communicate your desires into your subconscious."
+    title: "The Nairobi Hustle",
+    lesson: "In Nairobi, everyone has a 'guy' for everything. If you don't have a guy, you are the person someone else calls 'my guy'."
   },
   {
     number: 4,
-    title: "Specialized Knowledge",
-    lesson: "Knowledge is only potential power. It becomes actual power only when organized into plans of action."
+    title: "Kanjo Logic",
+    lesson: "The fastest runners in Kenya aren't from Iten; they are Nairobi hawkers when they hear the Kanjo siren."
   },
   {
     number: 5,
-    title: "Imagination",
-    lesson: "The workshop of the mind. Man can create anything which he can imagine."
+    title: "Nairobi Time",
+    lesson: "'Nakuja' means I haven't left the house. 'Niko karibu' means I've just reached the stage. 'Niko hapo nje' means I'm 10 minutes away."
   },
   {
     number: 6,
-    title: "Organized Planning",
-    lesson: "The crystallization of desire into action. Purpose without a plan is just a wish."
+    title: "Culinary Truths",
+    lesson: "Safe passage through Nairobi traffic is best fueled by a 'smokie-pasua' with extra kachumbari."
   },
   {
     number: 7,
-    title: "Decision",
-    lesson: "The mastery of procrastination. Successful people reach decisions promptly and change them slowly."
+    title: "The Shortcut Rule",
+    lesson: "A Nairobi shortcut will either save you an hour or lead you into a scenic tour of a neighborhood you didn't know existed."
   },
   {
     number: 8,
-    title: "Persistence",
-    lesson: "The sustained effort necessary to induce faith. Ease of achievement is usually proportional to persistence."
+    title: "Weather Report",
+    lesson: "Nairobi weather is like a toxic relationship: It will give you sunshine at 10 AM and a thunderstorm at 10:05 AM."
   },
   {
     number: 9,
-    title: "Power of the Master Mind",
-    lesson: "Coordination of knowledge and effort in a spirit of harmony between two or more people."
+    title: "CBD Parking",
+    lesson: "If you find a parking spot in CBD at noon, look around—it's either a trap or you're dreaming."
   },
   {
     number: 10,
-    title: "The Mystery of Sex Transmutation",
-    lesson: "Switching the mind from thoughts of physical expression to thoughts of some other creative effort."
-  },
-  {
-    number: 11,
-    title: "The Subconscious Mind",
-    lesson: "The connecting link between the finite mind of man and Infinite Intelligence."
-  },
-  {
-    number: 12,
-    title: "The Brain",
-    lesson: "A broadcasting and receiving station for thought. Every human brain is capable of picking up vibrations of thought."
-  },
-  {
-    number: 13,
-    title: "The Sixth Sense",
-    lesson: "The door to the temple of wisdom. It allows you to receive warnings and inspirations through hunches."
+    title: "Matatu Ethics",
+    lesson: "The conductor's 'hapo mbele tutashuka' is a statement of faith, not a destination."
   }
 ];
