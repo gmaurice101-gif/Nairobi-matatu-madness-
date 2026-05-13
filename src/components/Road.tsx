@@ -37,6 +37,11 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNit
 
   return (
     <motion.div 
+      onPanEnd={(_, info) => {
+        const threshold = 30;
+        if (info.offset.x > threshold) onSteer('right');
+        else if (info.offset.x < -threshold) onSteer('left');
+      }}
       animate={isGameOver ? {
         x: [0, -10, 10, -5, 5, 0],
         transition: { duration: 0.3 }
