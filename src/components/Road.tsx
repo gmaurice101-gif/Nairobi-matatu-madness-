@@ -9,17 +9,36 @@ interface RoadProps {
   traffic: Vehicle[];
   powerUps: PowerUp[];
   isNitroActive: boolean;
+  isGameOver: boolean;
   onSteer: (direction: 'left' | 'right') => void;
 }
 
-export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNitroActive, onSteer }) => {
+export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNitroActive, isGameOver, onSteer }) => {
+  const [particles, setParticles] = React.useState<{id: number, x: number, y: number, life: number}[]>([]);
+  
+  // Tire smoke / exhaust effect
+  React.useEffect(() => {
+    if (isGameOver) return;
+    const interval = setInterval(() => {
+      setParticles(prev => [
+        ...prev.map(p => ({ ...p, y: p.y + 2, life: p.life - 0.1 })).filter(p => p.life > 0),
+        { id: Date.now(), x: (Math.random() - 0.5) * 15, y: -5, life: 1.5 }
+      ].slice(-30));
+    }, isNitroActive ? 30 : 80);
+    return () => clearInterval(interval);
+  }, [isNitroActive, isGameOver]);
+
   const handleSteerZone = (direction: 'left' | 'right') => {
     onSteer(direction);
   };
 
   return (
-    <div 
-      className={`relative bg-slate-800 border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[220px] sm:w-[260px] h-[500px] sm:h-[600px] touch-none mx-auto transition-colors duration-300 ${isNitroActive ? 'ring-4 ring-yellow-400 ring-inset' : ''}`}
+    <motion.div 
+      animate={isGameOver ? {
+        x: [0, -10, 10, -5, 5, 0],
+        transition: { duration: 0.3 }
+      } : {}}
+      className={`relative bg-slate-800 border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[220px] sm:w-[260px] h-[500px] sm:h-[600px] touch-none mx-auto transition-colors duration-300 ${isNitroActive ? 'ring-4 ring-yellow-400 ring-inset shadow-[0_0_50px_rgba(250,204,21,0.2)]' : ''}`}
     >
       {/* Nitro Speed Lines Overlay */}
       <AnimatePresence>
@@ -53,8 +72,13 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNit
 
       {/* Road Texture/Scrolling effect */}
       <div className="absolute inset-0 opacity-5 pointer-events-none">
-        <div className="h-[200%] w-full bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px] animate-scroll-road" />
+        <div className={`h-[200%] w-full bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px] ${isNitroActive ? 'animate-scroll-road-fast' : 'animate-scroll-road'}`} />
       </div>
+      
+      {/* Nitro Blur Effect */}
+      {isNitroActive && (
+        <div className="absolute inset-0 bg-gradient-to-b from-yellow-400/10 via-transparent to-yellow-400/10 pointer-events-none z-10 animate-pulse" />
+      )}
 
       {/* Kenyan Road Themes: Signs and Markings */}
       <div className="absolute top-20 -left-4 w-12 h-12 bg-yellow-500 rounded-sm rotate-45 border-2 border-black flex items-center justify-center opacity-40">
@@ -135,7 +159,8 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNit
       <motion.div 
         animate={{ 
           left: `${(playerLane * (100 / LANES)) + (100 / LANES / 2)}%`,
-          scale: isNitroActive ? 1.1 : 1
+          scale: isNitroActive ? 1.15 : 1,
+          rotate: isGameOver ? 20 : 0
         }}
         transition={{ type: 'spring', stiffness: 400, damping: 35 }}
         className="absolute w-10 h-14 sm:w-12 sm:h-18 top-[75%] z-10"
@@ -144,15 +169,33 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNit
         }}
       >
         <div className="relative h-full w-full">
+          {/* Exhaust Particles */}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 pointer-events-none">
+            {particles.map(p => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0.6, scale: 0.5, x: p.x, y: p.y }}
+                animate={{ opacity: 0, scale: 2, y: p.y + (isNitroActive ? 40 : 20) }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className={`absolute w-3 h-3 rounded-full blur-[2px] ${isNitroActive ? 'bg-orange-500/40' : 'bg-slate-400/20'}`}
+              />
+            ))}
+          </div>
+
           {isNitroActive && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 0.8, scale: 1.2, y: 10 }}
-              transition={{ repeat: Infinity, duration: 0.1, repeatType: "reverse" }}
-              className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-orange-500"
-            >
-              <Flame size={24} fill="currentColor" />
-            </motion.div>
+            <>
+              {/* Nitro Aura */}
+              <div className="absolute -inset-2 bg-yellow-400/20 rounded-full blur-xl animate-pulse" />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 0.8, scale: 1.2, y: 15 }}
+                transition={{ repeat: Infinity, duration: 0.05, repeatType: "reverse" }}
+                className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-yellow-500 flex flex-col items-center"
+              >
+                <Flame size={20} fill="currentColor" className="drop-shadow-[0_0_8px_rgba(234,179,8,1)]" />
+                <Flame size={12} fill="currentColor" className="-mt-2 opacity-60" />
+              </motion.div>
+            </>
           )}
           <VehicleComponent color="yellow" type="matatu" isPlayer />
         </div>
@@ -171,6 +214,6 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNit
           aria-label="Steer Right"
         />
       </div>
-    </div>
+    </motion.div>
   );
 };

@@ -167,6 +167,7 @@ export default function App() {
             traffic={traffic} 
             powerUps={powerUps}
             isNitroActive={isNitroActive}
+            isGameOver={gameOver}
             onSteer={handleSteer} 
           />
           

@@ -17,8 +17,17 @@ body {
   to { transform: translateY(0); }
 }
 
+@keyframes scroll-road-fast {
+  from { transform: translateY(-50%); }
+  to { transform: translateY(0); }
+}
+
 .animate-scroll-road {
   animation: scroll-road 1s linear infinite;
+}
+
+.animate-scroll-road-fast {
+  animation: scroll-road-fast 0.25s linear infinite;
 }
 
 @keyframes spin-slow {

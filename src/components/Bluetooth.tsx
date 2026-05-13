@@ -46,9 +46,9 @@ export const Bluetooth: React.FC = () => {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="fixed top-4 left-4 w-12 h-12 bg-blue-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-40"
+        className="fixed top-4 right-32 w-10 h-10 bg-blue-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-40 border border-blue-400/50"
       >
-        <BluetoothIcon size={24} />
+        <BluetoothIcon size={18} />
       </button>
 
       <AnimatePresence>
