@@ -5,7 +5,21 @@
 
 export type Color = 'yellow' | 'green' | 'red' | 'blue' | 'purple' | 'orange' | 'pink' | 'cyan' | 'white' | 'black' | 'silver';
 
-export type VehicleType = 'matatu' | 'bus' | 'tuk-tuk' | 'boda-boda' | 'taxi' | 'truck' | 'bicycle' | 'lorry' | 'suv';
+export type VehicleType = 'matatu' | 'bus' | 'tuk-tuk' | 'boda-boda' | 'taxi' | 'truck' | 'bicycle' | 'lorry' | 'suv' | 'probox' | 'hilux' | 'canter' | 'ambulance';
+
+export interface Highway {
+  name: string;
+  color: string;
+  speedMultiplier: number;
+}
+
+export const HIGHWAYS: Highway[] = [
+  { name: "Thika Superhighway", color: "#334155", speedMultiplier: 1 },
+  { name: "Mombasa Road", color: "#475569", speedMultiplier: 1.1 },
+  { name: "Ngong Road", color: "#1e293b", speedMultiplier: 1.2 },
+  { name: "Waiyaki Way", color: "#334155", speedMultiplier: 1.3 },
+  { name: "Nairobi Expressway", color: "#0f172a", speedMultiplier: 1.5 },
+];
 
 export interface Vehicle {
   id: string;

@@ -20,6 +20,7 @@ export default function App() {
     score,
     gameOver,
     level,
+    highwayName,
     isPaused,
     isNitroActive,
     resetGame,
@@ -141,9 +142,12 @@ export default function App() {
           </div>
 
           <div className="flex-1 bg-slate-900/80 backdrop-blur-md p-3 sm:p-6 rounded-2xl border border-slate-800 shadow-xl">
-            <div className="flex items-center gap-2 text-slate-400 mb-1">
-              <RotateCcw size={12} className="sm:w-4 sm:h-4" />
-              <span className="text-[8px] sm:text-xs font-bold uppercase tracking-widest">Level</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-slate-400 mb-1">
+                <RotateCcw size={12} className="sm:w-4 sm:h-4" />
+                <span className="text-[8px] sm:text-xs font-bold uppercase tracking-widest">Highway</span>
+              </div>
+              <span className="text-[8px] font-black text-green-400/50 uppercase tracking-tighter">{highwayName}</span>
             </div>
             <div className="text-xl sm:text-4xl font-display font-bold text-green-400">
               {level}
@@ -168,6 +172,7 @@ export default function App() {
             powerUps={powerUps}
             isNitroActive={isNitroActive}
             isGameOver={gameOver}
+            highwayName={highwayName}
             onSteer={handleSteer} 
           />
           

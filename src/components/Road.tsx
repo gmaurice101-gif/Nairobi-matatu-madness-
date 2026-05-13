@@ -1,8 +1,8 @@
 import React from 'react';
-import { Vehicle, LANES, PowerUp } from '../types';
+import { Vehicle, LANES, PowerUp, HIGHWAYS } from '../types';
 import { Vehicle as VehicleComponent } from './Vehicle';
 import { motion, AnimatePresence } from 'motion/react';
-import { Flame, Zap } from 'lucide-react';
+import { Flame, Zap, MapPin } from 'lucide-react';
 
 interface RoadProps {
   playerLane: number;
@@ -10,11 +10,14 @@ interface RoadProps {
   powerUps: PowerUp[];
   isNitroActive: boolean;
   isGameOver: boolean;
+  highwayName: string;
   onSteer: (direction: 'left' | 'right') => void;
 }
 
-export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNitroActive, isGameOver, onSteer }) => {
+export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNitroActive, isGameOver, highwayName, onSteer }) => {
   const [particles, setParticles] = React.useState<{id: number, x: number, y: number, life: number}[]>([]);
+  
+  const highwayInfo = HIGHWAYS.find(h => h.name === highwayName) || HIGHWAYS[0];
   
   // Tire smoke / exhaust effect
   React.useEffect(() => {
@@ -22,7 +25,7 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNit
     const interval = setInterval(() => {
       setParticles(prev => [
         ...prev.map(p => ({ ...p, y: p.y + 2, life: p.life - 0.1 })).filter(p => p.life > 0),
-        { id: Date.now(), x: (Math.random() - 0.5) * 15, y: -5, life: 1.5 }
+        { id: Math.random() + Date.now(), x: (Math.random() - 0.5) * 15, y: -5, life: 1.5 }
       ].slice(-30));
     }, isNitroActive ? 30 : 80);
     return () => clearInterval(interval);
@@ -38,8 +41,20 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNit
         x: [0, -10, 10, -5, 5, 0],
         transition: { duration: 0.3 }
       } : {}}
-      className={`relative bg-slate-800 border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[220px] sm:w-[260px] h-[500px] sm:h-[600px] touch-none mx-auto transition-colors duration-300 ${isNitroActive ? 'ring-4 ring-yellow-400 ring-inset shadow-[0_0_50px_rgba(250,204,21,0.2)]' : ''}`}
+      className={`relative border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[220px] sm:w-[260px] h-[500px] sm:h-[600px] touch-none mx-auto transition-colors duration-500 ${isNitroActive ? 'ring-4 ring-yellow-400 ring-inset shadow-[0_0_50px_rgba(250,204,21,0.2)]' : ''}`}
+      style={{ backgroundColor: highwayInfo.color }}
     >
+      {/* Highway Name Badge */}
+      <motion.div 
+        key={highwayName}
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full border border-white/20 flex items-center gap-1 shadow-lg"
+      >
+        <MapPin size={10} className="text-red-500 fill-current" />
+        <span className="text-[9px] font-black uppercase tracking-[0.1em] text-white whitespace-nowrap">{highwayName}</span>
+      </motion.div>
+
       {/* Nitro Speed Lines Overlay */}
       <AnimatePresence>
         {isNitroActive && (

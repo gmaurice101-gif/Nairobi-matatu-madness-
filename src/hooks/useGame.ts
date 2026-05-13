@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Color, COLORS, Vehicle, LANES, VehicleType, PowerUp } from '../types';
+import { Color, COLORS, Vehicle, LANES, VehicleType, PowerUp, HIGHWAYS } from '../types';
 
 const INITIAL_SPEED = 0.3;
 const SPEED_INCREMENT = 0.00008;
@@ -16,6 +16,7 @@ export function useGame(isActive: boolean = true) {
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [level, setLevel] = useState(1);
+  const [highwayName, setHighwayName] = useState(HIGHWAYS[0].name);
   const [isPaused, setIsPaused] = useState(false);
   const [gameSpeed, setGameSpeed] = useState(INITIAL_SPEED);
   const [isNitroActive, setIsNitroActive] = useState(false);
@@ -32,6 +33,11 @@ export function useGame(isActive: boolean = true) {
   const isNitroActiveRef = useRef(isNitroActive);
   const nitroTimerRef = useRef<number | null>(null);
 
+  useEffect(() => {
+    const currentHighway = HIGHWAYS[(level - 1) % HIGHWAYS.length];
+    setHighwayName(currentHighway.name);
+  }, [level]);
+
   useEffect(() => { playerLaneRef.current = playerLane; }, [playerLane]);
   useEffect(() => { gameSpeedRef.current = gameSpeed; }, [gameSpeed]);
   useEffect(() => { gameOverRef.current = gameOver; }, [gameOver]);
@@ -44,9 +50,17 @@ export function useGame(isActive: boolean = true) {
     vehicleCountRef.current += 1;
     const colors = Object.keys(COLORS) as Color[];
     const color = colors[Math.floor(Math.random() * colors.length)];
-    const types: VehicleType[] = ['matatu', 'bus', 'tuk-tuk', 'boda-boda', 'taxi', 'truck', 'bicycle', 'lorry', 'suv'];
+    const types: VehicleType[] = [
+      'matatu', 'matatu', 'matatu', // Weightings
+      'bus', 'bus',
+      'tuk-tuk', 'boda-boda', 'boda-boda',
+      'taxi', 'suv', 'probox', 'probox',
+      'hilux', 'canter', 'ambulance', 'truck', 'lorry'
+    ];
     const type = types[Math.floor(Math.random() * types.length)];
     const lane = Math.floor(Math.random() * LANES);
+
+    const highwayBoost = HIGHWAYS[(level - 1) % HIGHWAYS.length].speedMultiplier;
 
     return {
       id: `traffic-${vehicleCountRef.current}-${crypto.randomUUID()}`,
@@ -54,9 +68,9 @@ export function useGame(isActive: boolean = true) {
       y: -20, // Start above screen
       color,
       type,
-      speed: INITIAL_SPEED + (Math.random() * 0.2),
+      speed: (INITIAL_SPEED + (Math.random() * 0.2)) * highwayBoost,
     };
-  }, []);
+  }, [level]);
 
   const getRandomPowerUp = useCallback((): PowerUp => {
     return {
@@ -202,6 +216,7 @@ export function useGame(isActive: boolean = true) {
     score,
     gameOver,
     level,
+    highwayName,
     isPaused,
     isNitroActive,
     resetGame,

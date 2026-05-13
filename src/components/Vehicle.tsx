@@ -43,6 +43,55 @@ export const Vehicle: React.FC<VehicleProps> = ({ color, type, isPlayer }) => {
             <div className="absolute top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-yellow-100 rounded-full blur-[1px]" /> {/* Front light */}
           </div>
         );
+      case 'ambulance':
+        return (
+          <div className="w-full h-full relative bg-white rounded-md overflow-hidden shadow-lg border-2 border-red-500/50">
+            <div className="absolute inset-0 flex items-center justify-center opacity-20">
+              <div className="w-8 h-2 bg-red-600 rotate-90" />
+              <div className="w-8 h-2 bg-red-600" />
+            </div>
+            {/* Flashing Lights */}
+            <div className="absolute -top-1 left-2 w-3 h-2 bg-red-500 animate-pulse" />
+            <div className="absolute -top-1 right-2 w-3 h-2 bg-blue-500 animate-pulse delay-75" />
+            <div className="absolute top-2 left-1 right-1 h-3 bg-slate-800/80 rounded-sm" />
+          </div>
+        );
+      case 'probox':
+        return (
+          <div className="w-full h-full relative rounded-md overflow-hidden shadow-lg bg-white" style={{ backgroundColor: baseColor }}>
+            <div className="absolute top-2 left-1 right-1 h-2 bg-slate-800/80 rounded-sm" />
+            <div className="absolute bottom-1 left-1 right-1 h-4 bg-slate-900/10 border-t border-black/10" /> {/* Extended cargo */}
+            <div className="absolute -bottom-1 left-1 w-2 h-1 bg-red-600" />
+            <div className="absolute -bottom-1 right-1 w-2 h-1 bg-red-600" />
+          </div>
+        );
+      case 'hilux':
+        return (
+          <div className="w-full h-full relative flex flex-col">
+            <div className="w-full h-2/5 bg-slate-700 rounded-t-lg relative" style={{ backgroundColor: baseColor }}>
+              <div className="absolute top-2 left-1 right-1 h-1.5 bg-slate-800/80 rounded-sm" />
+            </div>
+            <div className="w-full h-3/5 bg-slate-600 border-x-2 border-slate-800 relative shadow-inner overflow-hidden">
+               {/* Truck bed */}
+              <div className="absolute inset-x-1 top-0 bottom-1 bg-black/20 rounded-sm" />
+            </div>
+          </div>
+        );
+      case 'canter':
+        return (
+          <div className="w-full h-full relative flex flex-col">
+            <div className="w-full h-1/4 bg-slate-100 rounded-t-sm" style={{ backgroundColor: baseColor }}>
+              <div className="absolute top-1 left-1 right-1 h-1.5 bg-slate-800/80 rounded-sm" />
+            </div>
+            <div className="w-full h-3/4 bg-slate-300 border-t-2 border-slate-800 relative">
+              <div className="absolute inset-0 flex flex-col gap-1 p-1">
+                <div className="w-full h-1 bg-black/10" />
+                <div className="w-full h-1 bg-black/10" />
+                <div className="w-full h-1 bg-black/10" />
+              </div>
+            </div>
+          </div>
+        );
       case 'truck':
       case 'lorry':
         return (
@@ -68,9 +117,25 @@ export const Vehicle: React.FC<VehicleProps> = ({ color, type, isPlayer }) => {
           </div>
         );
       case 'bus':
+        return (
+          <div className="w-full h-full relative rounded-b-md shadow-lg overflow-hidden flex flex-col" style={{ backgroundColor: baseColor }}>
+            {/* Bus roof */}
+            <div className="absolute inset-x-2 top-4 bottom-4 border border-black/10 rounded-sm" />
+            <div className="h-1/5 bg-slate-800/20" /> {/* Front */}
+            <div className="flex-1 flex flex-col gap-2 p-1 pt-4">
+              <div className="h-1 bg-white/20 w-full" />
+              <div className="h-1 bg-white/20 w-full" />
+              <div className="h-1 bg-white/20 w-full" />
+            </div>
+            {/* Destination Board */}
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 bg-slate-900 px-2 py-0.5 rounded-sm">
+              <span className="text-[4px] text-yellow-400 font-bold uppercase">CITY HOPPER</span>
+            </div>
+          </div>
+        );
       case 'matatu':
       default:
-        const isSmall = type === 'taxi' || type === 'suv';
+        const isSmall = type === 'taxi' || type === 'suv' || type === 'probox' || type === 'ambulance';
         return (
           <div
             className={`w-full h-full relative rounded-md overflow-hidden shadow-lg ${isSmall ? 'scale-90' : ''}`}
