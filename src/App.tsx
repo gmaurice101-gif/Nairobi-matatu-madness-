@@ -4,9 +4,10 @@ import { Road } from './components/Road';
 import { Vehicle } from './components/Vehicle';
 import { Messaging } from './components/Messaging';
 import { Bluetooth } from './components/Bluetooth';
-import { auth, db } from './firebase';
+import { Leaderboard } from './components/Leaderboard';
+import { auth, db, handleFirestoreError, OperationType } from './firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Play, Pause, RotateCcw, Volume2, VolumeX, Music, Zap, LogIn, User as UserIcon, BookOpen } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -28,12 +29,24 @@ export default function App() {
     isPaused,
     isNitroActive,
     resetGame,
-    setIsPaused
+    setIsPaused,
+    highScore,
+    setHighScore
   } = useGame(difficulty, gameStarted);
 
   const [isMuted, setIsMuted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [currentPrinciple, setCurrentPrinciple] = useState(NAIROBI_WISDOM[0]);
+
+  useEffect(() => {
+    if (gameOver && user) {
+      // Sync high score to firestore
+      setDoc(doc(db, 'users', user.uid), {
+        highScore: highScore,
+        lastSeen: serverTimestamp()
+      }, { merge: true });
+    }
+  }, [gameOver, highScore, user]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -47,6 +60,19 @@ export default function App() {
           lastSeen: serverTimestamp(),
           isOnline: true
         }, { merge: true });
+
+        // Retrieve existing high score
+        const path = `users/${currentUser.uid}`;
+        onSnapshot(doc(db, 'users', currentUser.uid), (doc) => {
+          if (doc.exists()) {
+            const data = doc.data();
+            if (data.highScore > highScore) {
+              setHighScore(data.highScore);
+            }
+          }
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, path);
+        });
       }
     });
     return () => unsubscribe();
@@ -147,11 +173,15 @@ export default function App() {
               </button>
             </div>
             <div className="flex items-center gap-2 text-slate-400 mb-1">
-              <Trophy size={12} className="sm:w-4 sm:h-4" />
-              <span className="text-[8px] sm:text-xs font-bold uppercase tracking-widest">Score</span>
+              <Trophy size={12} className="sm:w-4 sm:h-4 text-yellow-400" />
+              <span className="text-[8px] sm:text-xs font-bold uppercase tracking-widest">Points</span>
             </div>
-            <div className="text-xl sm:text-4xl font-display font-bold text-yellow-400">
+            <div className="text-xl sm:text-4xl font-display font-bold text-yellow-500">
               {score.toLocaleString()}
+            </div>
+            <div className="mt-2 pt-2 border-t border-slate-800 flex justify-between items-center group">
+              <span className="text-[7px] sm:text-[9px] font-bold uppercase tracking-widest text-slate-500">Personal Best</span>
+              <span className="text-[10px] sm:text-xs font-display font-bold text-slate-300">{highScore.toLocaleString()}</span>
             </div>
           </div>
 
@@ -345,10 +375,19 @@ export default function App() {
               <span className="text-[8px] text-slate-500">Next Level in {1000 - (score % 1000)}m</span>
             </div>
           </div>
+
+          <div className="hidden md:block w-full">
+            <Leaderboard />
+          </div>
         </div>
       </div>
 
-      {/* Messaging & Bluetooth Components */}
+      {/* Mobile Leaderboard */}
+      <div className="w-full max-w-md mt-6 md:hidden">
+        <Leaderboard />
+      </div>
+
+      {/* Global Comms Overlays (Responsive) */}
       <Messaging />
       <Bluetooth />
 

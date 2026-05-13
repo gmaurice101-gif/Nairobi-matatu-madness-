@@ -13,6 +13,7 @@ export function useGame(difficulty: DifficultyLevel, isActive: boolean = true) {
   const [traffic, setTraffic] = useState<Vehicle[]>([]);
   const [powerUps, setPowerUps] = useState<PowerUp[]>([]);
   const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [level, setLevel] = useState(1);
   const [highwayName, setHighwayName] = useState(HIGHWAYS[0].name);
@@ -27,6 +28,7 @@ export function useGame(difficulty: DifficultyLevel, isActive: boolean = true) {
   const playerLaneRef = useRef(playerLane);
   const gameSpeedRef = useRef(gameSpeed);
   const gameOverRef = useRef(gameOver);
+  const highScoreRef = useRef(highScore);
   const isPausedRef = useRef(isPaused);
   const isActiveRef = useRef(isActive);
   const isNitroActiveRef = useRef(isNitroActive);
@@ -40,6 +42,7 @@ export function useGame(difficulty: DifficultyLevel, isActive: boolean = true) {
   useEffect(() => { playerLaneRef.current = playerLane; }, [playerLane]);
   useEffect(() => { gameSpeedRef.current = gameSpeed; }, [gameSpeed]);
   useEffect(() => { gameOverRef.current = gameOver; }, [gameOver]);
+  useEffect(() => { highScoreRef.current = highScore; }, [highScore]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   useEffect(() => { isActiveRef.current = isActive; }, [isActive]);
   useEffect(() => { isNitroActiveRef.current = isNitroActive; }, [isNitroActive]);
@@ -167,9 +170,15 @@ export function useGame(difficulty: DifficultyLevel, isActive: boolean = true) {
       return nextPowerUps;
     });
 
-    // Update score and speed
-    setScore(prev => prev + (isNitroActiveRef.current ? 2 : 1));
-    setGameSpeed(prev => prev + config.speedIncrement);
+      // Update score and speed
+      setScore(prev => {
+        const newScore = prev + (isNitroActiveRef.current ? 2 : 1);
+        if (newScore > highScoreRef.current) {
+          setHighScore(newScore);
+        }
+        return newScore;
+      });
+      setGameSpeed(prev => prev + config.speedIncrement);
     
     gameLoopRef.current = requestAnimationFrame(update);
   }, [getRandomVehicle, getRandomPowerUp, config.spawnRate, config.maxVehicles, config.speedIncrement]);
@@ -214,6 +223,8 @@ export function useGame(difficulty: DifficultyLevel, isActive: boolean = true) {
     traffic,
     powerUps,
     score,
+    highScore,
+    setHighScore,
     gameOver,
     level,
     highwayName,

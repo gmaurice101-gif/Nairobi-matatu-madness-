@@ -51,17 +51,17 @@ service cloud.firestore {
                data.timestamp == request.time;
       }
 
-      function isParticipant(chatId) {
-        return chatId == 'group' || chatId.split('_').hasAny([request.auth.uid]);
+      function isParticipant(data) {
+        return data.chatId == 'group' || data.senderId == request.auth.uid || data.recipientId == request.auth.uid;
       }
 
       // Allow read/list only if user is participant
-      allow read, list: if isAuthenticated() && isParticipant(resource.data.chatId);
+      allow read, list: if isAuthenticated() && isParticipant(resource.data);
       
       allow create: if isAuthenticated() && 
                       isValidId(messageId) && 
                       isValidMessage(request.resource.data) &&
-                      isParticipant(request.resource.data.chatId);
+                      isParticipant(request.resource.data);
                       
       allow update, delete: if false;
     }
@@ -69,7 +69,11 @@ service cloud.firestore {
     match /users/{uid} {
       function isValidUser(data) {
         return data.uid == request.auth.uid &&
-               data.displayName is string && data.displayName.size() <= 100;
+               data.displayName is string && data.displayName.size() <= 100 &&
+               (!('photoURL' in data) || data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 512)) &&
+               (!('lastSeen' in data) || data.lastSeen == null || data.lastSeen is timestamp) &&
+               (!('isOnline' in data) || data.isOnline == null || data.isOnline is bool) &&
+               (!('highScore' in data) || data.highScore is number);
       }
 
       allow read: if isAuthenticated();

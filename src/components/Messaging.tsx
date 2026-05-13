@@ -57,11 +57,12 @@ export const Messaging: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch online users
+  // Fetch users
   useEffect(() => {
     if (!isLoggedIn) return;
     const path = 'users';
-    const q = query(collection(db, path), where('isOnline', '==', true));
+    // Remove the where filter to show all players, but indicate online status
+    const q = query(collection(db, path), orderBy('lastSeen', 'desc'), limit(50));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const users = snapshot.docs
         .map(doc => doc.data() as OnlineUser)
@@ -217,12 +218,17 @@ export const Messaging: React.FC = () => {
                   <button 
                     key={u.uid}
                     onClick={() => { setSelectedRecipient(u); setViewMode('chat'); }}
-                    className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${selectedRecipient?.uid === u.uid ? 'bg-yellow-400 border border-yellow-500' : 'hover:bg-slate-800'}`}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-colors relative ${selectedRecipient?.uid === u.uid ? 'bg-yellow-400 border border-yellow-500' : 'hover:bg-slate-800'}`}
                   >
-                    <img src={u.photoURL} alt={u.displayName} className="w-8 h-8 rounded-full" />
+                    <div className="relative">
+                      <img src={u.photoURL} alt={u.displayName} className="w-8 h-8 rounded-full border border-slate-700" />
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-900 ${u.isOnline ? 'bg-green-500 animate-pulse' : 'bg-slate-600'}`} />
+                    </div>
                     <div className="flex flex-col items-start text-left">
                       <span className={`text-xs font-bold ${selectedRecipient?.uid === u.uid ? 'text-slate-900' : 'text-slate-200'}`}>{u.displayName}</span>
-                      <span className={`text-[8px] uppercase ${selectedRecipient?.uid === u.uid ? 'text-slate-900/60' : 'text-slate-500'}`}>Online now</span>
+                      <span className={`text-[8px] uppercase ${selectedRecipient?.uid === u.uid ? 'text-slate-900/60' : 'text-slate-500'}`}>
+                        {u.isOnline ? 'Online now' : 'Offline'}
+                      </span>
                     </div>
                   </button>
                 ))}
