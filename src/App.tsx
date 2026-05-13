@@ -7,24 +7,28 @@ import { Bluetooth } from './components/Bluetooth';
 import { auth } from './firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trophy, Play, Pause, RotateCcw, Volume2, VolumeX, Music, Zap, LogIn, User as UserIcon } from 'lucide-react';
+import { Trophy, Play, Pause, RotateCcw, Volume2, VolumeX, Music, Zap, LogIn, User as UserIcon, BookOpen } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { THINK_AND_GROW_RICH_PRINCIPLES } from './constants';
 
 export default function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const {
     playerLane,
     traffic,
+    powerUps,
     score,
     gameOver,
     level,
     isPaused,
+    isNitroActive,
     resetGame,
     setIsPaused
   } = useGame(gameStarted);
 
   const [isMuted, setIsMuted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [currentPrinciple, setCurrentPrinciple] = useState(THINK_AND_GROW_RICH_PRINCIPLES[0]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -35,6 +39,10 @@ export default function App() {
 
   useEffect(() => {
     if (gameOver) {
+      // Pick a random principle on crash
+      const randomIdx = Math.floor(Math.random() * THINK_AND_GROW_RICH_PRINCIPLES.length);
+      setCurrentPrinciple(THINK_AND_GROW_RICH_PRINCIPLES[randomIdx]);
+
       confetti({
         particleCount: 150,
         spread: 70,
@@ -154,7 +162,13 @@ export default function App() {
 
         {/* Center: Game Board */}
         <div className="relative flex justify-center w-full md:w-auto">
-          <Road playerLane={playerLane} traffic={traffic} onSteer={handleSteer} />
+          <Road 
+            playerLane={playerLane} 
+            traffic={traffic} 
+            powerUps={powerUps}
+            isNitroActive={isNitroActive}
+            onSteer={handleSteer} 
+          />
           
           <AnimatePresence>
             {!gameStarted && (
@@ -194,13 +208,28 @@ export default function App() {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 onClick={handleRestart}
-                className="absolute inset-0 bg-red-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-[100] cursor-pointer"
+                className="absolute inset-0 bg-red-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 text-center rounded-lg z-[100] cursor-pointer"
               >
+                <motion.div 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="w-full max-w-xs bg-slate-900/90 p-4 rounded-xl border border-red-500/30 mb-6 shadow-2xl relative overflow-hidden"
+                >
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-red-500/10 rounded-full blur-2xl" />
+                  <div className="flex items-center gap-2 text-red-400 mb-2 justify-center">
+                    <BookOpen size={14} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Principle #{currentPrinciple.number}</span>
+                  </div>
+                  <h3 className="text-white font-display font-bold text-lg mb-2 uppercase tracking-tight">{currentPrinciple.title}</h3>
+                  <p className="text-slate-300 text-[11px] leading-relaxed italic">"{currentPrinciple.lesson}"</p>
+                </motion.div>
+
                 <h2 className="text-2xl sm:text-4xl font-display font-black text-white mb-1 sm:mb-2">CRASHED!</h2>
-                <p className="text-slate-300 text-xs sm:text-sm mb-4 sm:mb-6">Nairobi traffic is ruthless.</p>
-                <div className="text-3xl sm:text-5xl font-display font-bold text-yellow-400 mb-4 sm:mb-8">{score}</div>
+                <p className="text-slate-300 text-[10px] sm:text-xs mb-4 sm:mb-6 uppercase tracking-widest font-bold opacity-60">Nairobi traffic is ruthless.</p>
+                <div className="text-3xl sm:text-5xl font-display font-bold text-yellow-400 mb-4 sm:mb-8">{score.toLocaleString()}</div>
                 <button 
-                  className="bg-white text-slate-950 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 text-sm sm:text-base"
+                  className="bg-white text-slate-950 px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 text-sm sm:text-base pr-8"
                 >
                   <RotateCcw size={18} />
                   TRY AGAIN

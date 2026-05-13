@@ -16,6 +16,13 @@ export interface Vehicle {
   speed: number;
 }
 
+export interface PowerUp {
+  id: string;
+  lane: number;
+  y: number;
+  type: 'nitro';
+}
+
 export const LANES = 3;
 export const ROAD_HEIGHT = 100; // 100%
 
