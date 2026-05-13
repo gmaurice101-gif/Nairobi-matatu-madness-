@@ -37,6 +37,36 @@ export interface PowerUp {
   type: 'nitro';
 }
 
+export type DifficultyLevel = 'Easy' | 'Medium' | 'Hard';
+
+export interface DifficultySettings {
+  initialSpeed: number;
+  speedIncrement: number;
+  spawnRate: number;
+  maxVehicles: number;
+}
+
+export const DIFFICULTY_CONFIG: Record<DifficultyLevel, DifficultySettings> = {
+  Easy: {
+    initialSpeed: 0.25,
+    speedIncrement: 0.00005,
+    spawnRate: 2000,
+    maxVehicles: 4,
+  },
+  Medium: {
+    initialSpeed: 0.35,
+    speedIncrement: 0.0001,
+    spawnRate: 1500,
+    maxVehicles: 6,
+  },
+  Hard: {
+    initialSpeed: 0.45,
+    speedIncrement: 0.00015,
+    spawnRate: 1000,
+    maxVehicles: 8,
+  },
+};
+
 export const LANES = 3;
 export const ROAD_HEIGHT = 100; // 100%
 

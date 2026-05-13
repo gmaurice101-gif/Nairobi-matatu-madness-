@@ -4,15 +4,19 @@ import { Road } from './components/Road';
 import { Vehicle } from './components/Vehicle';
 import { Messaging } from './components/Messaging';
 import { Bluetooth } from './components/Bluetooth';
-import { auth } from './firebase';
+import { auth, db } from './firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Play, Pause, RotateCcw, Volume2, VolumeX, Music, Zap, LogIn, User as UserIcon, BookOpen } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { NAIROBI_WISDOM } from './constants';
 
+import { DifficultyLevel, DIFFICULTY_CONFIG } from './types';
+
 export default function App() {
   const [gameStarted, setGameStarted] = useState(false);
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>('Medium');
   const {
     playerLane,
     traffic,
@@ -25,7 +29,7 @@ export default function App() {
     isNitroActive,
     resetGame,
     setIsPaused
-  } = useGame(gameStarted);
+  } = useGame(difficulty, gameStarted);
 
   const [isMuted, setIsMuted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -34,6 +38,16 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        // Update user profile in Firestore
+        setDoc(doc(db, 'users', currentUser.uid), {
+          uid: currentUser.uid,
+          displayName: currentUser.displayName,
+          photoURL: currentUser.photoURL,
+          lastSeen: serverTimestamp(),
+          isOnline: true
+        }, { merge: true });
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -142,16 +156,23 @@ export default function App() {
           </div>
 
           <div className="flex-1 bg-slate-900/80 backdrop-blur-md p-3 sm:p-6 rounded-2xl border border-slate-800 shadow-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-slate-400 mb-1">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-slate-400">
                 <RotateCcw size={12} className="sm:w-4 sm:h-4" />
                 <span className="text-[8px] sm:text-xs font-bold uppercase tracking-widest">Highway</span>
               </div>
-              <span className="text-[8px] font-black text-green-400/50 uppercase tracking-tighter">{highwayName}</span>
+              <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${
+                difficulty === 'Easy' ? 'bg-green-500/20 text-green-400' :
+                difficulty === 'Medium' ? 'bg-yellow-400/20 text-yellow-400' :
+                'bg-red-500/20 text-red-500'
+              }`}>
+                {difficulty}
+              </span>
             </div>
             <div className="text-xl sm:text-4xl font-display font-bold text-green-400">
               {level}
             </div>
+            <span className="text-[8px] font-black text-slate-600 uppercase tracking-tighter block mt-1">{highwayName}</span>
           </div>
 
           <div className="hidden md:flex flex-col gap-2 mt-4">
@@ -182,8 +203,7 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={handleStart}
-                className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-[100] cursor-pointer"
+                className="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8 text-center rounded-lg z-[100]"
               >
                 <h1 className="text-3xl sm:text-5xl font-display font-black text-white mb-1 sm:mb-2 tracking-tighter">
                   MATATU <span className="text-yellow-400">RACING</span>
@@ -200,10 +220,35 @@ export default function App() {
                   </motion.div>
                 </div>
 
+                <div className="flex flex-col gap-3 w-full mb-8">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Select Intensity</span>
+                  <div className="flex gap-2 justify-center">
+                    {(['Easy', 'Medium', 'Hard'] as DifficultyLevel[]).map((level) => (
+                      <button
+                        key={level}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDifficulty(level);
+                        }}
+                        className={`flex-1 py-3 px-4 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all border ${
+                          difficulty === level 
+                            ? level === 'Easy' ? 'bg-green-500 border-green-400 text-white shadow-[0_0_20px_rgba(34,197,94,0.3)]' :
+                              level === 'Medium' ? 'bg-yellow-400 border-yellow-300 text-slate-950 shadow-[0_0_20px_rgba(250,204,21,0.3)]' :
+                              'bg-red-500 border-red-400 text-white shadow-[0_0_20px_rgba(239,68,68,0.3)]'
+                            : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700'
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <button 
-                  className="bg-green-600 hover:bg-green-500 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-full font-bold flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-green-900/20 text-sm sm:text-base"
+                  onClick={handleStart}
+                  className="w-full bg-green-600 hover:bg-green-500 text-white py-4 rounded-xl font-black flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] active:scale-95 shadow-xl shadow-green-900/20 text-sm"
                 >
-                  <Play fill="currentColor" size={18} />
+                  <Play fill="currentColor" size={20} />
                   START ENGINE
                 </button>
               </motion.div>

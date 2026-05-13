@@ -43,12 +43,45 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNit
         else if (info.offset.x < -threshold) onSteer('left');
       }}
       animate={isGameOver ? {
-        x: [0, -10, 10, -5, 5, 0],
-        transition: { duration: 0.3 }
+        x: [0, -15, 15, -10, 10, -5, 5, 0],
+        y: [0, 5, -5, 3, -3, 0],
+        transition: { duration: 0.4, ease: "easeInOut" }
       } : {}}
-      className={`relative border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[220px] sm:w-[260px] h-[500px] sm:h-[600px] touch-none mx-auto transition-colors duration-500 ${isNitroActive ? 'ring-4 ring-yellow-400 ring-inset shadow-[0_0_50px_rgba(250,204,21,0.2)]' : ''}`}
+      className={`relative border-x-8 border-slate-700 rounded-lg shadow-2xl overflow-hidden w-[220px] sm:w-[260px] h-[500px] sm:h-[600px] touch-none mx-auto transition-colors duration-500 ${isNitroActive ? 'ring-4 ring-yellow-400 ring-inset shadow-[0_0_50px_rgba(250,204,21,0.2)]' : ''} ${isGameOver ? 'scale-[1.02]' : ''}`}
       style={{ backgroundColor: highwayInfo.color }}
     >
+      {/* Impact Flash */}
+      {isGameOver && (
+        <div className="absolute inset-0 z-50 pointer-events-none animate-impact-flash" />
+      )}
+
+      {/* Collision Sparks */}
+      <AnimatePresence>
+        {isGameOver && (
+          <div className="absolute inset-x-0 top-[75%] h-20 z-40 pointer-events-none flex items-center justify-center">
+            <div className="relative w-20 h-20">
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={`spark-${i}`}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ 
+                    scale: [0, 1.5, 0],
+                    opacity: [0, 1, 0],
+                    x: (Math.random() - 0.5) * 80,
+                    y: (Math.random() - 0.5) * 80,
+                  }}
+                  transition={{ duration: 0.5, delay: Math.random() * 0.2 }}
+                  className="absolute w-2 h-2 bg-yellow-400 rounded-full blur-[1px]"
+                  style={{ 
+                    left: '50%',
+                    top: '50%'
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
       {/* Highway Name Badge */}
       <motion.div 
         key={highwayName}
@@ -69,17 +102,28 @@ export const Road: React.FC<RoadProps> = ({ playerLane, traffic, powerUps, isNit
             exit={{ opacity: 0 }}
             className="absolute inset-0 pointer-events-none z-20"
           >
-            {[...Array(6)].map((_, i) => (
+            {/* Rapid Speed Lines */}
+            {[...Array(12)].map((_, i) => (
               <motion.div 
                 key={i}
-                initial={{ y: -100 }}
-                animate={{ y: 600 }}
-                transition={{ duration: 0.2, repeat: Infinity, delay: i * 0.05, ease: "linear" }}
-                className="absolute w-0.5 h-20 bg-yellow-400/30"
-                style={{ left: `${(i + 1) * 15}%` }}
+                initial={{ y: -200, opacity: 0 }}
+                animate={{ y: 800, opacity: [0, 1, 1, 0] }}
+                transition={{ 
+                  duration: 0.15 + (Math.random() * 0.1), 
+                  repeat: Infinity, 
+                  delay: Math.random() * 0.5, 
+                  ease: "linear" 
+                }}
+                className={`absolute ${i % 3 === 0 ? 'w-1 h-32 bg-white/40' : 'w-0.5 h-20 bg-yellow-400/30'} blur-[1px]`}
+                style={{ left: `${Math.random() * 100}%` }}
               />
             ))}
-            <div className="absolute inset-0 bg-yellow-400/5 mix-blend-overlay" />
+            
+            {/* Lateral Edge Glow */}
+            <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-yellow-400/20 to-transparent animate-pulse" />
+            <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-yellow-400/20 to-transparent animate-pulse" />
+            
+            <div className="absolute inset-0 bg-yellow-400/5 mix-blend-overlay animate-[flicker_0.1s_infinite]" />
           </motion.div>
         )}
       </AnimatePresence>

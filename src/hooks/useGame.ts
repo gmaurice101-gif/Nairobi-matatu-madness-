@@ -1,15 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Color, COLORS, Vehicle, LANES, VehicleType, PowerUp, HIGHWAYS } from '../types';
+import { Color, COLORS, Vehicle, LANES, VehicleType, PowerUp, HIGHWAYS, DifficultyLevel, DIFFICULTY_CONFIG } from '../types';
 
-const INITIAL_SPEED = 0.3;
-const SPEED_INCREMENT = 0.00008;
-const SPAWN_RATE = 1000; // ms
 const PLAYER_Y = 75; // Percentage from top
 const NITRO_DURATION = 5000; // 5 seconds
 const NITRO_SPEED_MULTIPLIER = 2;
 const POWERUP_SPAWN_CHANCE = 0.1; // 10% chance
 
-export function useGame(isActive: boolean = true) {
+export function useGame(difficulty: DifficultyLevel, isActive: boolean = true) {
+  const config = DIFFICULTY_CONFIG[difficulty];
+  
   const [playerLane, setPlayerLane] = useState(1); // Middle lane
   const [traffic, setTraffic] = useState<Vehicle[]>([]);
   const [powerUps, setPowerUps] = useState<PowerUp[]>([]);
@@ -18,7 +17,7 @@ export function useGame(isActive: boolean = true) {
   const [level, setLevel] = useState(1);
   const [highwayName, setHighwayName] = useState(HIGHWAYS[0].name);
   const [isPaused, setIsPaused] = useState(false);
-  const [gameSpeed, setGameSpeed] = useState(INITIAL_SPEED);
+  const [gameSpeed, setGameSpeed] = useState(config.initialSpeed);
   const [isNitroActive, setIsNitroActive] = useState(false);
   
   const gameLoopRef = useRef<number | null>(null);
@@ -68,9 +67,9 @@ export function useGame(isActive: boolean = true) {
       y: -20, // Start above screen
       color,
       type,
-      speed: (INITIAL_SPEED + (Math.random() * 0.2)) * highwayBoost,
+      speed: (config.initialSpeed + (Math.random() * 0.2)) * highwayBoost,
     };
-  }, [level]);
+  }, [level, config.initialSpeed]);
 
   const getRandomPowerUp = useCallback((): PowerUp => {
     return {
@@ -82,6 +81,7 @@ export function useGame(isActive: boolean = true) {
   }, []);
 
   const resetGame = () => {
+    const currentConfig = DIFFICULTY_CONFIG[difficulty];
     setTraffic([]);
     setPowerUps([]);
     setScore(0);
@@ -89,7 +89,7 @@ export function useGame(isActive: boolean = true) {
     setGameOver(false);
     setIsPaused(false);
     setPlayerLane(1);
-    setGameSpeed(INITIAL_SPEED);
+    setGameSpeed(currentConfig.initialSpeed);
     setIsNitroActive(false);
     spawnTimerRef.current = 0;
     if (nitroTimerRef.current) clearTimeout(nitroTimerRef.current);
@@ -117,8 +117,8 @@ export function useGame(isActive: boolean = true) {
 
       // Spawn
       spawnTimerRef.current += deltaTime;
-      const spawnThreshold = SPAWN_RATE / (gameSpeedRef.current * 2);
-      if (spawnTimerRef.current > spawnThreshold) {
+      const spawnThreshold = config.spawnRate / (gameSpeedRef.current * 2);
+      if (spawnTimerRef.current > spawnThreshold && nextTraffic.length < config.maxVehicles) {
         nextTraffic = [...nextTraffic, getRandomVehicle()];
         spawnTimerRef.current = 0;
 
@@ -169,10 +169,10 @@ export function useGame(isActive: boolean = true) {
 
     // Update score and speed
     setScore(prev => prev + (isNitroActiveRef.current ? 2 : 1));
-    setGameSpeed(prev => prev + SPEED_INCREMENT);
+    setGameSpeed(prev => prev + config.speedIncrement);
     
     gameLoopRef.current = requestAnimationFrame(update);
-  }, [getRandomVehicle, getRandomPowerUp]);
+  }, [getRandomVehicle, getRandomPowerUp, config.spawnRate, config.maxVehicles, config.speedIncrement]);
 
   useEffect(() => {
     if (score > level * 1000) {

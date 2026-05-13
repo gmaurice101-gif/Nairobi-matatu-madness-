@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { db, auth } from '../firebase';
-import { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { db, auth, handleFirestoreError, OperationType } from '../firebase';
+import { collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp, where } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, X, Lock } from 'lucide-react';
+import { Send, X, Lock, Users, User as UserIcon, MessageSquare } from 'lucide-react';
 
 // Simple symmetric encryption for demo purposes
 const SECRET_KEY = 'NGANYA-SECURE-KEY';
@@ -27,7 +27,16 @@ interface Message {
   text: string;
   senderId: string;
   senderName: string;
+  recipientId: string | 'all';
+  chatId: string;
   timestamp: any;
+}
+
+interface OnlineUser {
+  uid: string;
+  displayName: string;
+  photoURL: string;
+  isOnline: boolean;
 }
 
 export const Messaging: React.FC = () => {
@@ -36,6 +45,9 @@ export const Messaging: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [selectedRecipient, setSelectedRecipient] = useState<OnlineUser | null>(null); // null means Group Chat
+  const [viewMode, setViewMode] = useState<'chat' | 'users'>('chat');
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,11 +57,34 @@ export const Messaging: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
+  // Fetch online users
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const path = 'users';
+    const q = query(collection(db, path), where('isOnline', '==', true));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const users = snapshot.docs
+        .map(doc => doc.data() as OnlineUser)
+        .filter(u => u.uid !== auth.currentUser?.uid);
+      setOnlineUsers(users);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, path);
+    });
+    return () => unsubscribe();
+  }, [isLoggedIn]);
+
+  // Fetch messages
   useEffect(() => {
     if (!isLoggedIn) return;
 
+    const currentChatId = selectedRecipient 
+      ? [auth.currentUser!.uid, selectedRecipient.uid].sort().join('_')
+      : 'group';
+
+    const path = 'messages';
     const q = query(
-      collection(db, 'messages'),
+      collection(db, path),
+      where('chatId', '==', currentChatId),
       orderBy('timestamp', 'asc'),
       limit(50)
     );
@@ -60,31 +95,40 @@ export const Messaging: React.FC = () => {
         ...doc.data()
       })) as Message[];
       setMessages(msgs);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, path);
     });
 
     return () => unsubscribe();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, selectedRecipient]);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, isMinimized]);
+  }, [messages, isMinimized, viewMode]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !auth.currentUser) return;
 
+    const currentChatId = selectedRecipient 
+      ? [auth.currentUser.uid, selectedRecipient.uid].sort().join('_')
+      : 'group';
+
+    const path = 'messages';
     try {
-      await addDoc(collection(db, 'messages'), {
+      await addDoc(collection(db, path), {
         text: encrypt(newMessage),
         senderId: auth.currentUser.uid,
         senderName: auth.currentUser.displayName || 'Anonymous',
+        recipientId: selectedRecipient ? selectedRecipient.uid : 'all',
+        chatId: currentChatId,
         timestamp: serverTimestamp()
       });
       setNewMessage('');
     } catch (error) {
-      console.error("Error sending message:", error);
+      handleFirestoreError(error, OperationType.CREATE, path);
     }
   };
 
@@ -104,7 +148,9 @@ export const Messaging: React.FC = () => {
           >
             <div className="flex items-center gap-2 mb-2">
               <Lock size={10} className="text-green-400" />
-              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Live Encrypted Feed</span>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">
+                {selectedRecipient ? `Private: ${selectedRecipient.displayName}` : 'Live Encrypted Feed'}
+              </span>
             </div>
             <div className="flex flex-col gap-1">
               {messages.slice(-2).map((msg, i) => (
@@ -113,7 +159,7 @@ export const Messaging: React.FC = () => {
                   {decrypt(msg.text)}
                 </div>
               ))}
-              {messages.length === 0 && <span className="text-[10px] text-slate-600 italic">No messages yet...</span>}
+              {messages.length === 0 && <span className="text-[10px] text-slate-600 italic">No fresh messages...</span>}
             </div>
           </motion.div>
         ) : (
@@ -125,61 +171,125 @@ export const Messaging: React.FC = () => {
             className="w-80 h-[450px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="p-4 border-b border-slate-800 bg-slate-800/50 flex items-center justify-between">
+            <div className="p-3 border-b border-slate-800 bg-slate-800/50 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-xs font-bold uppercase tracking-widest text-slate-200">Secure Matatu Line</span>
-              </div>
-              <button onClick={() => setIsMinimized(true)} className="text-slate-400 hover:text-white">
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Messages */}
-            <div 
-              ref={scrollRef}
-              className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 scrollbar-hide bg-slate-950/20"
-            >
-              {messages.map((msg, idx) => (
-                <div 
-                  key={`${msg.id}-${idx}`}
-                  className={`flex flex-col ${msg.senderId === auth.currentUser?.uid ? 'items-end' : 'items-start'}`}
+                <button 
+                  onClick={() => setViewMode(viewMode === 'chat' ? 'users' : 'chat')}
+                  className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-colors"
                 >
-                  <span className="text-[9px] text-slate-500 mb-0.5 px-1 font-bold">{msg.senderName}</span>
-                  <div 
-                    className={`max-w-[85%] p-2.5 rounded-xl text-xs ${
-                      msg.senderId === auth.currentUser?.uid 
-                        ? 'bg-yellow-400 text-slate-950 rounded-tr-none' 
-                        : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'
-                    }`}
-                  >
-                    {decrypt(msg.text)}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Input bar */}
-            <form onSubmit={handleSendMessage} className="p-3 bg-slate-900 border-t border-slate-800 flex gap-2">
-              <div className="relative flex-1">
-                <input 
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type an encrypted message..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-full px-4 py-2 pr-10 text-[11px] text-white focus:outline-none focus:border-yellow-400 placeholder:text-slate-600"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500/50">
-                  <Lock size={12} />
+                  {viewMode === 'chat' ? <Users size={16} /> : <MessageSquare size={16} />}
+                </button>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-200">
+                    {viewMode === 'users' ? 'Online Players' : (selectedRecipient ? selectedRecipient.displayName : 'Group Chat')}
+                  </span>
+                  {viewMode === 'chat' && (
+                    <span className="text-[8px] text-green-400 animate-pulse uppercase font-black">
+                      {selectedRecipient ? 'Encrypted Link' : 'Public Channel'}
+                    </span>
+                  )}
                 </div>
               </div>
-              <button 
-                type="submit"
-                className="w-8 h-8 bg-yellow-400 text-slate-950 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-yellow-900/10"
-              >
-                <Send size={14} />
-              </button>
-            </form>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setIsMinimized(true)} className="text-slate-400 hover:text-white transition-colors">
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {viewMode === 'users' ? (
+              /* User List */
+              <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1 bg-slate-950/20">
+                <button 
+                  onClick={() => { setSelectedRecipient(null); setViewMode('chat'); }}
+                  className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${!selectedRecipient ? 'bg-yellow-400/20 border border-yellow-400/30' : 'hover:bg-slate-800 text-slate-400'}`}
+                >
+                  <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
+                    <Users size={16} />
+                  </div>
+                  <div className="flex flex-col items-start">
+                    <span className="text-xs font-bold text-slate-200">Group Chat</span>
+                    <span className="text-[8px] uppercase">Everyone on the highway</span>
+                  </div>
+                </button>
+                <div className="text-[8px] text-slate-600 uppercase font-black px-2 mt-4 mb-2">Available Drivers</div>
+                {onlineUsers.map(u => (
+                  <button 
+                    key={u.uid}
+                    onClick={() => { setSelectedRecipient(u); setViewMode('chat'); }}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${selectedRecipient?.uid === u.uid ? 'bg-yellow-400 border border-yellow-500' : 'hover:bg-slate-800'}`}
+                  >
+                    <img src={u.photoURL} alt={u.displayName} className="w-8 h-8 rounded-full" />
+                    <div className="flex flex-col items-start text-left">
+                      <span className={`text-xs font-bold ${selectedRecipient?.uid === u.uid ? 'text-slate-900' : 'text-slate-200'}`}>{u.displayName}</span>
+                      <span className={`text-[8px] uppercase ${selectedRecipient?.uid === u.uid ? 'text-slate-900/60' : 'text-slate-500'}`}>Online now</span>
+                    </div>
+                  </button>
+                ))}
+                {onlineUsers.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-10 opacity-40">
+                    <UserIcon size={32} className="mb-2" />
+                    <span className="text-xs">No other drivers online</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Chat Messages */
+              <>
+                <div 
+                  ref={scrollRef}
+                  className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 scrollbar-hide bg-slate-950/20"
+                >
+                  {messages.map((msg, idx) => (
+                    <div 
+                      key={`${msg.id}-${idx}`}
+                      className={`flex flex-col ${msg.senderId === auth.currentUser?.uid ? 'items-end' : 'items-start'}`}
+                    >
+                      {(!selectedRecipient && msg.senderId !== auth.currentUser?.uid) && (
+                        <span className="text-[9px] text-slate-500 mb-0.5 px-1 font-bold">{msg.senderName}</span>
+                      )}
+                      <div 
+                        className={`max-w-[85%] p-2.5 rounded-xl text-xs ${
+                          msg.senderId === auth.currentUser?.uid 
+                            ? 'bg-yellow-400 text-slate-950 rounded-tr-none shadow-lg shadow-yellow-900/10' 
+                            : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700'
+                        }`}
+                      >
+                        {decrypt(msg.text)}
+                      </div>
+                    </div>
+                  ))}
+                  {messages.length === 0 && (
+                    <div className="flex-1 flex flex-col items-center justify-center opacity-20">
+                      <Lock size={32} className="mb-2" />
+                      <span className="text-xs uppercase tracking-widest font-black">Encrypted Line Ready</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Input bar */}
+                <form onSubmit={handleSendMessage} className="p-3 bg-slate-900 border-t border-slate-800 flex gap-2">
+                  <div className="relative flex-1">
+                    <input 
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder={selectedRecipient ? `Chat with ${selectedRecipient.displayName.split(' ')[0]}...` : "Send to all drivers..."}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-full px-4 py-2 pr-10 text-[11px] text-white focus:outline-none focus:border-yellow-400 placeholder:text-slate-600"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500/50">
+                      <Lock size={12} />
+                    </div>
+                  </div>
+                  <button 
+                    type="submit"
+                    className="w-8 h-8 bg-yellow-400 text-slate-950 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-yellow-900/10"
+                  >
+                    <Send size={14} />
+                  </button>
+                </form>
+              </>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
