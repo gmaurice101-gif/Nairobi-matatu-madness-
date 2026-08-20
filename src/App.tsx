@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Play, Pause, RotateCcw, Volume2, VolumeX, Music, Zap, LogIn, User as UserIcon, BookOpen } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { NAIROBI_WISDOM } from './constants';
+import { Analytics } from '@vercel/analytics/react';
 
 import { DifficultyLevel, DIFFICULTY_CONFIG } from './types';
 
@@ -435,6 +436,9 @@ export default function App() {
       {/* Floating Decorative Elements */}
       <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-500/10 rounded-full blur-3xl" />
       <div className="absolute bottom-20 right-10 w-32 h-32 bg-green-500/10 rounded-full blur-3xl" />
+      
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </div>
   );
 }
